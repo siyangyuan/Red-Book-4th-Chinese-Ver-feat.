@@ -187,3 +187,75 @@ function sayHi(){ console.log("Hi!");
 
 用这种形式，像 Mosaic 这样的浏览器将会安全的忽略 script 标签内的内容，支持 js 的浏览器回去寻找这样的结构识别出这里有必要的 js 内容需要被执行。<br>
 虽然这个形式依旧被所有浏览器正确识别和解释执行，它不再是必须的也不应该再使用。在 XHTML 模式下，它也会导致脚本被忽略因为它在一个有效的 XML 内容中。**_(20-09-17)_**
+
+#### 行内代码对比引用文件
+
+虽然可以直接在 HTML 中嵌入 js，但通常最佳实践是尽量用外部引用的方式引入 js 文件。注意，这里没有关于此实践硬性严格要求，关于外部文件的争议以下几点：
+
+- **可维护性** 分散于格式各样 HTML 页面中的 js 代码无疑是存在维护难度的。用一个文件夹管理所用到的 js 以便开发者基于文件目录修改目标代码。
+- **缓存** 浏览器通过特定设置缓存所有外部 js 文件，意味着如果你连两个网页使用了相同的文件，文件只需要被下载一次。这意味着更快的页面加载。
+- **未来趋势** 使用外部引用文件，就没必要使用 XHTML 或者文件预先声明这类 hack 方法了。引入外部文件的语法，在 HTML 和 XHTML 中也是相同。
+
+值得一提的考虑，当配置外部文件如何被请求时是它们对请求带宽的影响。（？？？这段话我看不明白 One notable consideration when configuring how external files are requested is their implication on request bandwidth. ）使用 SPDY/HTTP2，每个请求的开销从根本上被减少了，因而在像客户端传输脚本作为 js 组件轻量级依赖时是具备优势的。<br>
+例如，你的第一个页面可能有下列引用：
+
+```js
+<script src="mainA.js"></script>
+<script src="component1.js"></script>
+<script src="component2.js"></script>
+<script src="component3.js"></script>
+```
+
+之后的页面加载可能有下面引用：
+
+```js
+<script src="mainB.js"></script>
+<script src="component3.js"></script>
+<script src="component4.js"></script>
+<script src="component5.js"></script>
+```
+
+在初始化请求时，如果浏览器支持 SPDY/HTTP2，它可以有效的获取同个终端的文件数，接着它会将他们基于预备文件加入到浏览器缓存。从浏览器的角度来看，通过 SPDY/HTTP2 获取这些独立的资源们应该有大致和传输僵化而庞大的 js 参数相似的延迟。<br>
+第二个界面请求，因为你将你的应用划分到轻量缓存文件中，一些第二个页面也依赖的组件早已存在了缓存中。<br>
+当然，这假定浏览器支持 SPDY/HTTP2，是只对现代浏览器适用的假设。僵化而庞大的数据可能会对老的浏览器更加适配。
+
+#### 文件模式
+
+IE5.5 通过使用文件类型（doctype）切换，引入了文件模式的概念。开始的两个文件模式是怪异模式（使 IE 表现的像 5 版本一样但包含几个非标准的特性）和标准模式（使 IE 表现的更符合规范的方式）。虽然这两种模式渲染内容上最基本的不同点是与 CSS 相关的，这里也有几处和 js 相关的影响。在些影响，我们会在本书进行讨论。<br>
+自 IE 开始引入了文件模式的概念起，其他浏览器也跟着进行匹配。随着标准被大家承认，一个被称做几乎标准的模式冉冉升起。那个模式有很多标准模式的特性但并没有那么严格的去限制。最主要的不同是处理图片周围的空格的情景（最常见的就是在表格里使用图片时）<br>
+怪异模式在所有浏览器中都是通过不写文件开头的 doctype 来切换。这考虑到不好的实践因为怪异模式很难在跨浏览器中做兼容，除非 hack 手段否则真实浏览器的等级一致性是做不到的。<br>
+下面任意 doctype 被使用就意味着打开标准模式：
+
+```js
+<!-- HTML 4.01 Strict -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<!-- XHTML 1.0 Strict -->
+<!DOCTYPE html PUBLIC
+"-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<!-- HTML5 -->
+<!DOCTYPE html>
+```
+
+几乎标准模式（almost standards）都通过过渡性的，框架性的 doctypes 来转换，如下：
+
+```js
+<!-- HTML 4.01 Transitional --> <!DOCTYPE HTML PUBLIC
+"-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<!-- HTML 4.01 Frameset -->
+<!DOCTYPE HTML PUBLIC
+"-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+
+<!-- XHTML 1.0 Transitional -->
+<!DOCTYPE html PUBLIC
+"-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<!-- XHTML 1.0 Frameset -->
+<!DOCTYPE html PUBLIC
+"-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+```
+
+因为几乎标准模式和标准模式很接近，很少有区别。人们讨论“标准模式”可能是在说它们之一，关于文件模式的探测也不做区别。这本书中标准模式这个词就代表了除了怪异模式只外的所有模式。**_(20-09-18)_**
