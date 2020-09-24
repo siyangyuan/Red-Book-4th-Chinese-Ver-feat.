@@ -258,3 +258,132 @@ console.log(age); // 30 if (true) {
 let age = 26;
 console.log(age); // 26 }
 ```
+
+重复声明的报错是与顺序无关的，也与是否混用 var let 无关。不同类型的关键字不会声明不同类型的变量——它们只是指定了变量的关联作用域。
+
+```js
+var name;
+let name; // SyntaxError
+let age;
+var age; // SyntaxError
+```
+
+#### 现世的死域（temporal dead zone）
+
+另一区分 let 和 var 的重要行为是 let 声明不会产生变量提升现象：
+
+```js
+// name is hoisted
+console.log(name); // undefined
+var name = "Matt";
+// age is not hoisted
+console.log(age); // ReferenceError: age is not defined
+let age = 26;
+```
+
+当解析代码时，js 引擎会察觉到 let 声明在作用范围的稍后部分会出现，但这些变量无法在真正的声明出现前被引用。声明前的代码执行被称为“现世的死域（temporal dead zone）”，任何试图引用这类变量的行为都会抛出错误 ReferenceError。
+
+#### 全局声明
+
+不像 var 关键字，当使用 let 在全局上下文声明变量时，变量不会像 var 一样关联到 widow 对象。
+
+```js
+var name = "Matt";
+console.log(window.name); // 'Matt'
+let age = 26;
+console.log(window.age); // undefined
+```
+
+然而，let 声明还是会在全局作用域内发生，将和页面的生命周期共存。因此，你必须保证你的页面不会进行重复声明以免产生语法错误。
+
+#### 条件声明
+
+当使用 var 声明变量时，因为声明被提升，js 引擎会开心的在作用域顶部将多个冗余声明合并成一个。因为 let 声明被域限制到域内，不可能检查 let 变量是否被定义了，并且有条件的定义它如果它没被定义的话。
+
+```js
+<script>
+var name = 'Nicholas'; let age = 26;
+</script>
+<script>
+// Suppose this script is unsure about what has already been declared in the page.
+// It will assume variables have not been declared.
+var name = 'Matt';
+// No problems here, since this will be handled as a single hoisted declaration.
+// There is no need to check if it was previously declared.
+let age = 36;
+// This will throw an error when 'age' has already been declared.
+</script>
+```
+
+使用 try/catch 语句或者 typeof 操作符不是解决办法，如下在条件结构体范围内使用 let 声明会导致变量限制在域内。
+
+```js
+<script>
+let name = 'Nicholas';
+let age = 36;
+</script>
+<script>
+// Suppose this script is unsure about what has already been declared in the page.
+// It will assume variables have not been declared.
+if (typeof name !== 'undefined') {
+  let name;
+}
+// 'name' is restricted to the if {} block scope,
+// so this assignment will act as a global assignment
+name = 'Matt';
+try (age) {
+// If age is not declared, this will throw an error
+}
+catch(error) {
+let age;
+}
+// 'age' is restricted to the catch {} block scope, // so this assignment will act as a global assignment
+age = 26;
+</script>
+```
+
+因此，你无法使用条件声明的方式来处理这个 ES6 的声明关键字。
+
+> **注意** 无法使用在条件声明使用 let 关键字是一件好事，因为在你的代码中条件声明不是一个好的方式。它让程序流更难理解。如果你发现自己接近了这种方式，这是一个很好的机会去找一个更好的写代码方式。
+
+#### 在循环声明中的 let 关键字
+
+在 let 出现前，for 循环的定义引入一个迭代变量，这个变量会泄漏到循环体之外；
+
+```js
+for (var i = 0; i < 5; ++i) {
+  // do loop things
+}
+console.log(i); // 5
+```
+
+当转向使用 let 声明后，迭代比阿亮将会限制到循环体内：
+
+```js
+for (let i = 0; i < 5; ++i) {
+  // do loop things
+}
+console.log(i); // ReferenceError: i is not defined
+```
+
+使用 var，一个常见的问题的是唯一的定义和迭代值的修改：
+
+```js
+for (var i = 0; i < 5; ++i) {
+  setTimeout(() => console.log(i), 0);
+}
+// You might expect this to console.log 0, 1, 2, 3, 4
+// It will actually console.log 5, 5, 5, 5, 5
+```
+
+这种现象发生是因为循环退出但迭代值依然被赋值引发了，循环在 5 的时候退出。当 timeout 晚些被执行时，它们引用了相同的变量，因此 console.log 打出了最终值。<br>
+当使用 let 去声明循环迭代器时，在背后 js 引擎实际在每个循环中声明都声明了一个新的迭代值。每次 setTimeout 引用的都是独立的实例，然后 console 会打出预期的值：循环迭代执行时迭代变量的值。
+
+```js
+for (let i = 0; i < 5; ++i) {
+  setTimeout(() => console.log(i), 0);
+}
+// console.logs 0, 1, 2, 3, 4
+```
+
+这种每个迭代中声明的行为对任何方式的循环都是生效的，包括 for in 和 for of 循环。**_(20-09-24)_**
