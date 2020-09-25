@@ -447,4 +447,29 @@ for (const value of [1, 2, 3, 4, 5]) {
 
 #### 相较 let 最好用 const
 
-使用 const 声明允许浏览器运行时强制变量不可变，此外静态代码分析器会强制禁止违规的重新赋值操作。因此，很多开发者觉得这是有好处的，默认的，会将一个值声明为 const 除非他们知道将在未来某个点需要改变这个变量。允许开发者更清晰的知道这个值是不可变的，并可以快速检测到预期外的行为，比如代码试图执行预期之外的重新赋值操作。**_(20-09-25)_**
+使用 const 声明允许浏览器运行时强制变量不可变，此外静态代码分析器会强制禁止违规的重新赋值操作。因此，很多开发者觉得这是有好处的，默认的，会将一个值声明为 const 除非他们知道将在未来某个点需要改变这个变量。允许开发者更清晰的知道这个值是不可变的，并可以快速检测到预期外的行为，比如代码试图执行预期之外的重新赋值操作。
+
+### 数据类型
+ECMAScript 中存在六种简单类型（也叫基础类型）：Undefined，Null，Boolean，Number，String，Symbol（翻译者的话：书里还没有bigint）。Symbol 是 ES6 中新引入的。也有一种复杂类型叫做 Object，是一个无序的键值队。因为无法在 ECMAScript 中定义你自己的数据类型，所有值可以被认为是这其中类型中的一个。只有其中数据类型可能看起太少了不能完全表达数据类型；然而，ECMAScript 有动态外观使得每个单独的数据类型表现得像多种。
+#### typeof 操作符
+因为 ECMAScript 是无类型的，也就需要一个方法去决定给定变量的数据类型。typeof 操作符提供了这个信息。在一个值上使用 typeof 操作符号会返回下面字符串之一
+```shell
+"undefined" if the value is undefined
+"boolean" if the value is a Boolean
+"string" if the value is a string
+"number" if the value is a number
+"object" if the value is an object (other than a function) or null 
+"function" if the value is a function
+"symbol" if the value is a Symbol
+```
+typeof 操作符是这样调用的：
+```js
+let message = "some string";
+console.log(typeof message); // "string" 
+console.log(typeof(message)); // "string"
+console.log(typeof 95); // "number"
+```
+在这个例子中，不管是一个变量（message）还是一个被传入 typeof 操作符的字面意义的数字。注意，因为 typeof 是一个操作符而不是一个方法，所以不许要括号（尽管这样是可用的）。<br>
+注意这里有几个地方 typeof 返回了技术上正确的但看起来奇怪的值。调用 typeof null 返回的值为 “object”，特殊值 null 被认为是一个空对象的引用。
+> **注意** 技术上，在 ECMAScript 中方法被认为是对象，而不是其它类型。然而，它们确实有一下特别的属性，是的有必要通过 typeof 操作符来区分它们。***(20-09-25)***
+
