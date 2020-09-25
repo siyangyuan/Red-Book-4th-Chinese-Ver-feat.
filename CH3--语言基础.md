@@ -387,3 +387,64 @@ for (let i = 0; i < 5; ++i) {
 ```
 
 这种每个迭代中声明的行为对任何方式的循环都是生效的，包括 for in 和 for of 循环。**_(20-09-24)_**
+
+### const 声明
+
+const 和 let 相近，但有一点重要的不同——它必须被赋值初始化,并且声明后不能再被定义。试图修改一个 const 值会抛出一个运行时错误。
+
+```js
+const age = 26;
+age = 36; // TypeError: assignment to a constant
+// const still disallows redundant declaration
+const name = "Matt";
+const name = "Nicholas"; // SyntaxError
+// const is still scoped to blocks
+const name = "Matt";
+if (true) {
+  const name = "Nicholas";
+}
+console.log(name); // Matt
+```
+
+const 声明被强制指向它引用的变量。如果 const 变量引用了一个 object，它不会严格禁止修改该对象内的属性。
+
+```js
+const person = {};
+person.name = "Matt"; // ok
+```
+
+尽管 js 引擎会为在循环中的 let 迭代变量创建新的实例，尽管 cosnt 的表现和 let 相近，你不能用 const 去声明循环迭代器：
+
+```js
+for (const i = 0; i < 10; ++i) {} // TypeError: assignment to constant variable
+```
+
+然而，如果你想声明一个不可修改的 for 循环变量，const 是可用的--恰好地因为每次迭代都会创建一个新变量。这尤其与 for-of 和 for-in 循环相关。
+
+```js
+let i = 0;
+for (const j = 7; i < 5; ++i) {
+  console.log(j);
+}
+// 7, 7, 7, 7, 7
+for (const key in { a: 1, b: 2 }) {
+  console.log(key);
+}
+// a, b
+for (const value of [1, 2, 3, 4, 5]) {
+  console.log(value);
+}
+// 1, 2, 3, 4, 5
+```
+
+### 声明风格和最佳实践
+
+在 ES6 中引入了 let 和 const 客观的更好的规范了这门语言，应对日益提升的精准作用域声明及语义学。var 声明的诡异方式让整个 js 社区一期纠结掉了很多年的头发。在新关键字的启发下，这里有一些可以提升代码质量的通用模式出现。
+
+#### 不要用 var
+
+有了 let 和 const，大多数开发者不再需要在编码中使用到 var。感谢对变量作用域的细心管理，只允许使用 let 和 const 的模式保证了代码的质量，本地化声明，和 const 的正确性。
+
+#### 相较 let 最好用 const
+
+使用 const 声明允许浏览器运行时强制变量不可变，此外静态代码分析器会强制禁止违规的重新赋值操作。因此，很多开发者觉得这是有好处的，默认的，会将一个值声明为 const 除非他们知道将在未来某个点需要改变这个变量。允许开发者更清晰的知道这个值是不可变的，并可以快速检测到预期外的行为，比如代码试图执行预期之外的重新赋值操作。**_(20-09-25)_**
