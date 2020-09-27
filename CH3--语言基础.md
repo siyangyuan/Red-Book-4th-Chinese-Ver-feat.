@@ -473,3 +473,114 @@ console.log(typeof 95); // "number"
 注意这里有几个地方 typeof 返回了技术上正确的但看起来奇怪的值。调用 typeof null 返回的值为 “object”，特殊值 null 被认为是一个空对象的引用。
 > **注意** 技术上，在 ECMAScript 中方法被认为是对象，而不是其它类型。然而，它们确实有一下特别的属性，是的有必要通过 typeof 操作符来区分它们。***(20-09-25)***
 
+### undefined 类型
+undefined 类型只有一个值，就是特殊值 undefined。当一个变量使用 var 或 let 声明但缺没有初始化，它会如下被设置为 undefined 值：
+```js
+let message;
+console.log(message == undefined); // true
+```
+在这个例子中，变量 message 被声明了，却没有进行初始化。当和字面的值 undefined 对比时，得到的结果是相等的。这个例子和下面是相同的：
+```js
+let message = undefined;
+console.log(message == undefined); // true
+```
+这里的变量 message 被指定初始化为 undefined。这是非必须的，因为默认，任何没有初始化的值会被赋上 undefined。
+> **注意** 一般来说，你不应该将一个值特地设置为 undefined。字面的 undefined 值只要是用来进行比较而且是直到 ECMA-262第三版 才被加进来的，用来规范区分一个空对象指针（null）和未初始化的变量。
+
+注意，一个变量的值为 undefined 和一个完全未定义的变量是不同的，如下：
+```js
+let message; // this variable is declared but has a value of undefined
+// make sure this variable isn't declared // let age
+console.log(message); // "undefined"
+console.log(age); // causes an error
+```
+在这个例子中，第一个 log 会实际打印出变量 message，为 undefined。在第二个 log 中，一个未声明的变量 age 被出入到 console.log（）方法中，会因为没有声明变量引发一个错误。只有一个操作符可以用来操作未声明的变量：你可以在它上面调用 typeof (也可以调用 delete 不会引发错误，但这没有用处且在严格模式下会引发错误,**翻译者，自己试了下Reflect.deleteProperty() 是会报错的**)。<br>
+typeof 操作符当操作一个未初始化变量时返回 undefined，但是它也会返回 undefined 当操作一个未声明的变量时，这有些令人困扰。看看这个例子：
+```js
+let message; // this variable is declared but has a value of undefined
+// make sure this variable isn't declared
+// let age
+console.log(typeof message); // "undefined" 
+console.log(typeof age); // "undefined
+```
+在两个例子中，在变量上调用 typeof 会返回 undefined。逻辑上，这说的通因为没有一个操作符可以区分两个变量，尽管他们技术上是很不同的。
+> **注意** 尽管未初始化的变量会自动被赋值为 undefined，还是推荐你去初始化变量。这样，当 typeof 返回 undefined 的时候，你就会简单的明白，是这个值没有被声明，而不是没有被简单的初始化。
+
+undefined 这个值是带有’否定‘意义的。由此，你可以在需要使用它时进行简单的检查。牢记，有很多其它值也是‘否定’意义的，所以小心预测当你需要特别检测 undefined 值而不是简单的‘否定’意义值。
+```js
+let message; // this variable is declared but has a value of undefined
+// 'age' is not declared
+if (message) {
+// This block will not execute
+}
+if (!message) {
+// This block will execute
+}
+if (age) {
+// This will throw an error
+}
+```
+### null 类型
+null 类型第二个只有一个值的数据类型：特殊值 null。逻辑上，null 是一个空的对象指针，所以调用 typeof 会返回“object”当在下面例子传入一个 null 时：
+```js
+let car = null;
+console.log(typeof car); // "object"
+```
+定义一个之后用来持有对象的变量时，建议初始为 null 而不是其它任何值。这样，你可以特定检查 null 值来看一个变量是否晚些时候被 object 赋值，比如在这个例子中：
+```js
+if (car != null) {
+// do something with car
+}
+```
+undefined 是 null 的衍生物，所以 ECMA-262 将他们定义为表面上相等：
+```js
+console.log(null == undefined); // true
+console.log(null === undefined); // false 翻译者 在node10 下实验
+```
+在 null 和 undefined 间使用相等操作符（==），返回 true，注意这个操作符会为了比较目的转换它所比较的变量（操作值）。<br>
+即使 null 和 undefined 是相近的，他们的用处大不相同。如之前提到的，你不应该特意将一个值设置为 undefined，但这对 null 不适用。任何时候一个变量被需要但不可用时，null 就派上了用场。这帮助你保证了 null 的范例——它是一个空对象指针，且将它和 undefined 作区别。<br>
+null 也是否定意义的；由此可以在用到一个值时简单的进行检查。注意，和undefined 注意的一样，不翻译了。
+```js
+let message = null; 
+let age;
+if (message) { // This block
+}
+if (!message) { // This block
+}
+if (age) {
+// This block
+}
+if (!age) {
+// This block
+}
+```
+### boolean 类型
+boolean 类型 ECMAScript 中最常用的数据类型之一，它只有两个字面值：true 和 false。这两值是与数字值相区别的，所以 true 和 1 是不相等的，flase 和 0 也是不相等的。为 Boolean 变量赋值方法如下：
+```js
+let found = true; 
+let lost = false;
+```
+注意 boolean 字面值是大小写敏感的，所以 True 和 False（和其它大小写混合的写法）是有效的变量标识符，而不是 boolean 值。<br>
+虽然 boolean 只有两个字面值，所有类型的值在 ECMAScript 都有一个对应的 boolean 值。(省了几句废话)转换方法为：
+```js
+let message = "Hello world!";
+let messageAsBoolean = Boolean(message);
+```
+在这个例子中 message 被转换为一个 boolean 值且存到了 messageAsBoolean 变量中。Boolean() 转换方法在任何数据类型的值上调用且总是返回一个 boolean 值。转换规则与被转换值的类型及实际值相关。下表列出了数据类型和它们的特殊转换。
+
+| 数据类型 | 转换为true的值 | 转换为false的值 |
+|------|------------|------------|
+| Boolean  | true          | false         |
+| String  | 任何非空值        | “”空字符串        |
+| Objct  | 任何对象       | null      |
+| Number  | 非零数（包含无穷大 infinity）       | 0，NAN       |
+| Undefined  | n/a      | undefined      |
+
+这些转换是需要重点理解的，因为流程控制，比如 if 语句，自动的体现了 boolean 转换，如下：
+```js
+let message = "Hello world!";
+if (message) {
+console.log("Value is true");
+}
+```
+在这个例子中，log 会被打出来，因为 string 类型的 message 自动转化为它的 boolean 对应值（true）。因为这个自动转换，理解你在流程控制中的变量是很重要的。错误的使用一个对象去替代 boolean 值会彻底的改变你的程序流程。***(20-09-27)***
