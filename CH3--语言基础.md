@@ -584,3 +584,98 @@ console.log("Value is true");
 }
 ```
 在这个例子中，log 会被打出来，因为 string 类型的 message 自动转化为它的 boolean 对应值（true）。因为这个自动转换，理解你在流程控制中的变量是很重要的。错误的使用一个对象去替代 boolean 值会彻底的改变你的程序流程。***(20-09-27)***
+
+### number 类型
+也许 ECMAScript 中最有趣的数据类型就是 number，使用 IEEE-754 规范来代表整型和浮点值（也在某些语言中称为双精度值）。为了支持数字多样的类型，有几种不同的数字字面格式。<br>
+最基本的是十进制整型，可以直接键入，如下：
+```js
+let intNum = 55; // integer
+```
+整型也可以被表示为八进制或者十六进制，第一个数字必须是0后面跟随一串八进制数字（0到7）。如果在这字面量中有一个数字被监测到超过了这个范围，开头的0就会被忽略数字会被当作十进制处理，如下面例子：
+```js
+let octalNum1 = 070;// octal for 56
+let octalNum2 = 079;// invalid octal - interpreted as 79 
+let octalNum3 = 08;// invalid octal - interpreted as 8
+```
+八进制字面量在严格模式是不生效的并且会导致 js 引擎抛出一个语法错误。<br>
+为了创建一个十六进制数，你必须指定开头两个字节 0x（大小写敏感），后续跟着任意十六进制数（0到9，A 到 F）。字符可以是大写或者小写。
+```js
+let hexNum1 = 0xA; // hexadecimal for 10
+let hexNum2 = 0x1f; // hexadecimal for 31
+```
+用八或者十六进制创建的数字会在所有数学运算中被当作十进制数来处理。
+> **注意** 因为 js 中数字的存储方式，它实际上可能会有大于0或者小于0.大于0和小于0是被认为在任何情况下都是对等的，但在这里做一个澄清。
+
+#### 浮点值
+为了定义一个浮点值，你必须至少引入一个小数点且至少后面跟上一个数字。尽管小数点前没有必须要有一个整型，但我们推荐这样做。这里有一些例子：
+```js
+let floatNum1 = 1.1;
+let floatNum2 = 0.1;
+let floatNum3 = .1; // valid, but not recommended
+```
+因为存储浮点值消耗了存储整型两倍的空间，ECMAScript 总会寻找将值转换为整型的方法。当小数点后面没有数字时，这个值就会变成整型。而且，如果值是一个整数（如1.0），它也会被转换为整型，如下例：
+```js
+let floatNum1 = 1.; // missing digit after decimal - interpreted as integer 1
+let floatNum2 = 10.0; // whole number - interpreted as integer 10
+```
+对于每一个大的或者非常小的数字。浮点值可以用科学计数法（e-notation）表达式。他用一个数乘以10的指定次方来表示值。ECMAScript 规范中需要有一个数（整数或者浮点数）后面跟着一个小写或者大写的 E，后面再跟着10的次方。参考如下：
+```js
+let floatNum = 3.125e7; // equal to 31250000
+```
+在这个例子中，floatNum 等于 31,250,000 尽管使用科学记数法让它的表达方式变得更精简。这个符号的基本含义是“取 3.125，然后乘上 $10^7$ .”<br>
+科学记数法也可以表示很小的数，比如 0.00000000000000003,可以简明的表示为 3e-17.默认的，ECMAScript 转换任何任何小数点后有六个零以上的浮点值为科学记数法形式（如，0.0000003 变成 3e–7）.<br>
+浮点数会精确到 17 个小数位但远不及整个数字的算术计算。例如，0.1 + 0.2 得出  0.30000000000000004 而不是 0.3.这些小的约数是的检查浮点数值变得很困难。参考下例：
+```js
+if (a + b == 0.3) { // avoid! 
+console.log("You got 0.3.");
+}
+```
+这里，测试结果表明两个数的和不等于0.3。0.05和0.025之类的是符合逻辑的。但如果是0.1 + 0.2，如我们之前讨论的，这个结果会变成否定。因此不要相信验证浮点数的结果。
+> **注意** 理解约数错误是来自 IEEE-754（二进制浮点数算术标准）的浮点计算的影响，并非 ECMAScript 中独有的。其它语言使用了相同规范的话会有相同的问题。
+
+#### 值范围
+因为内存限制，并不是自然界所有数都能在 ECMAScript 中被表示。ECMAScript 中能表示的最小数存储在大多数浏览器中国呢 Number.MIN_VALUE 且值为 5e–324；最大值存储在 Number.MAX_VALUE 中且在大多数浏览器中为 1.7976931348623157e+308。如果一个数无法在 ECMAScript 的数字范围内被表示，该数字会自动的获取到特殊值 Infinity。任何无法被表示的负数会表示成  –Infinity，任何无法被表示的整数会表示成 Infinity。<br>
+如果一次计算返回整数或者负数的 Infinity，这个值将无法用在任何计算中。因为 Infinity 没有用来计算的数学含义。决定一个值是否为无穷（即，它在最小和最大之间），有一个 isFinite() 方法来验证。仅当参数在最小和最大之间时，这个方法会返回 true，如下例：
+```js
+let result = Number.MAX_VALUE + Number.MAX_VALUE; 
+console.log(isFinite(result)); // false
+```
+尽管很少会有超过无限大范围的计算，但这是有可能的并且在做很小或很大的数值的计算时因该检测该过程避免出错。
+> **注意** 你也可以通过 Number.NEGATIVE _ INFINITY 和 Number.POSITIVE _ INFINITY 来获取正的和负的无穷数。如你预想的，这些属性分别包含了 –Infinity 和 Infinity 值。
+
+#### NaN
+有一个叫 NaN 的特殊数字值，AKA 不是个数（Not a Number），引入用来在操作符试图返回一个数字却失败了的场景（预期返回一个错误）。例如，在其语言用 0 分割任意数字一般会引发错误，在代码执行过程中。在 ECMAXcript 中，用 0 分割一个数字会返回 NaN，允许其它操作继续进行。(翻译者没搞懂，dividing any number by 0 typically causes an error，咋分割的啊？)<br>
+NaN 有一对独有属性。一，任何操作符触及 NaN 都会返回 NaN（例如：NaN /10），可能会在多步计算中引发问题。二，NaN 不等于任何值，包括 NaN，例如下例：
+```js
+console.log(NaN == NaN); // false
+```
+因此，ECMAScript 提供了 isNaN() 方法。这个方法传入单个参数，可以是任何数据类型，去决定一个值是否“不是一个数字”。当一个值被传入 IsNaN（），会尝试将它转为数字。一些非数字的值会直接转化为数字，比如 String “10” 或者一个 Boolean 值。任何无法被转化为数字的值会让方法返回 true，参考下例：
+```js
+console.log(isNaN(NaN)); // true
+console.log(isNaN(10)); // false - 10 is a number
+console.log(isNaN("10")); // false - can be converted to number 10
+console.log(isNaN("blue"));  // true - cannot be converted to a number
+console.log(isNaN(true)); // false - can be converted to number 1
+```
+本例中测试了五个不同的值。第一个检测了 NaN 本身，显然的返回 true。接下来来那个为数字10和字符串“10”，都返回 false，因为两个的数值值为10.字符串“blue”，然而，无法被转化为数字，所以返回 true。boolean 值 true 可以被转化为 1，所以方法返回 false。
+> 尽管一般不会这样做，isNaN() 可以在对象上使用。这种情况，object 的 ValueOf（）方法会先被调用决定返回的值是否能转化为数字。如果不行，toString（）方法聚会被调用且它返回的值也会被检验。这种接续的方式作用在 ECMAScript 构造方法和操作符里，会在后续的 “操作符” 章节细讲。
+
+#### Number 转换
+有三个方法可以将非数值值转换为数值值：Number（）转化方法，parseInt（）方法，parseFloat（）方法。第一个方法可以用在任何数据类型上。另外两个方法用来将 string 转为 number。这些方法对于相同的输入有不同的反应。<br>
+Number（）方法的转换基于下列规则：
+* 当用在 Boolean 值上，true 和 false 分别转化为 1 和 0.
+* 当应用于 number 时，值简单的传入然后返回。
+* 当应用于 null 时，返回 0.
+* 当应用于 undefined 时，返回 NaN。
+* 当应用于 strings 时，下列规则会被实行：<br>
+1，如果字符串只含有数字字符，在前面加上任意 + 或者 -，它会转化为十进制数，所以 Number（“1”） 变为 1，Number（“011”）变为 11（注意开头的0，被忽略了）。<br>2，如果包含一个有效浮点数，则转化为数字的浮点值（重申，开头的0会被忽略）。<br>3，如果包含一个有效的十六进制值，如：“0xf”，他会被转化为一个值相当的整型15.<br>4，如果是空的，被转化为0.5，如果包含的数不在前四种场景中则转化为 NaN。
+* 当应用于 object 时，valueOf（）方法被调用并计入先前描述的规则转换。如果转化结果是 NaN，toString（）方法被调用，接着进入转换 string 的规则。
+
+从各种类型转化为 number 时复杂的，如之前阐述的对 Number（）的规则。这里有些具体例子：
+```js
+let num1 = Number("Hello world!"); // NaN
+let num2 = Number(""); // 0
+let num3 = Number("000011"); // 11
+let num4 = Number(true); // 1
+```
+在这个例子中，string “hello world”被转化为 NaN 因为***(20-09-28)***
