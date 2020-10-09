@@ -723,3 +723,15 @@ let num4 = parseFloat("22.34.5");// 22.34
 let num5 = parseFloat("0908.5");// 908.5
 let num6 = parseFloat("3.125e7");// 31250000
 ```
+
+### string类型
+string 数据表示可一个0或多个的 16-bits unicode 字符序列。字符串可以用双引号（“），单引号（‘），或者 backticks（`）描述，所以如下都是合法的：
+```js
+let firstName = "John";
+let lastName = 'Jacob';
+let lastName = `Jingleheimerschmidt`
+```
+不像一些其它语言，可以使用不同的引号来改变字符串的解释方式，在 ECMAScript 语法中是没有区别的。注意，然而，一个字符串还有和结尾的符号必须是相同的。例如，该例子就会引发一个语法错误：***(20-10-09)***
+```js
+let firstName = 'Nicholas"; // syntax error - quotes must match
+```
