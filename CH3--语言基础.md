@@ -735,3 +735,116 @@ let lastName = `Jingleheimerschmidt`
 ```js
 let firstName = 'Nicholas"; // syntax error - quotes must match
 ```
+#### 字符常量
+字符串数据类型包含了几种字符常量来表示不可打印的或其它用处的字符，如下列举：
+
+| 字面字符 | 意义 |
+|------|------------|
+| \n | 新的一行 |
+| \t | tab |
+| \b | 退格 |
+| \r | 回车 |
+| \f | 换页 |
+| \\ | 下划线（\） |
+| \' | 当引号（'）——当使用的string是被单引号标注的。例如：'he said,\'hi.\' |
+| \" | 双引号 |
+| \` | 重音符 |
+| \xnn | 通过十六进制编码表示字符 nn 为十六进制数 0-F。例如：\x41 等价于 "A" |
+| \unnn | 通过十六进制码表示一个 unicode 字符。例如：\u03a3 等价于希腊字符Σ |
+这些字符常量可以在string的任何位置被引入，且会被解释为当一的字符，如下：
+```js
+let text = "sigma: \u03a3.";
+```
+例子中，变量 test 是长度 9 的字符串尽转译字符长为 6 字符。整个转译序列代表了一个单一字符，所以它是如此计算的。<br>
+任何字符串的长度可以使用 length 属性获取，如下：
+```js
+console.log(text.length); // 9
+```
+这个属性返回了字符串中 16-bit 字符的数量。
+> **注意** 如果一个 string 包含了双类型的字符，length 属性可能就无法确切的返回字符串中字符的数量。这个情况的缓解策略在**基本引用类型**章节中有详细说明。
+
+#### string 的本质
+string 在 ECMAScript 中是不可变的（immutable），意味着他们一旦被创建，他们的值就不可变。去改变一个变量持有的字符串值，原有的字符串会被销毁且变量会被另一个包含新值的字符串填充，如下：
+```js
+let lang = "Java";
+lang = lang + "Script";
+```
+这里变量 lang 被定义包含了字符串“java”。下一行，lang 被重定义去结合了“java”和“Script”，值为“javaScript”。这通过创建一个新的空间为10字符的字符串，然后用“java”和“script”填充了这个字符串变量。程序的最后一步是摧毁原先的字符串“java”和“script”，因为他们都不再被需要。这都是表像之后发生的事件，这也是老版本浏览器(such as pre–1.0 versions of Firefox and Internet Explorer 6.0)在string相关处理很慢的原因。这些低效的部分在这些浏览器的后续版本中有被定为到。<br>
+#### 转变为一个字符串
+有两种将一个值转变为字符串的方法。第一种是用 toString（） 方法，这是几乎所有值都有的。这个方法的唯一工作是返回目标值的对应字符串值。参考下例：
+```js
+let age = 11;
+let ageAsString = age.toString(); // the string "11"
+let found = true;
+let foundAsString = found.toString(); // the string "true"
+```
+toString（）方法在数字，布尔，对象，字符串值上都是可用的。如果值是null或者undefined，这个方法就不可用了。<br>
+在大多数例子中，toString（）没有任何参数。然而，当调用者是数值时，toString（）会接收一个参数：输出数字的进制。默认的，toString（）会以十进制输出，但通过穿参可以输出2，8，16或任何合法的进制输出，如下：
+```js
+let num = 10; 
+console.log(num.toString()); // "10" 
+console.log(num.toString(2)); // "1010"
+console.log(num.toString(8));  // "12"
+console.log(num.toString(10));  // "10" 
+console.log(num.toString(16));// "a"
+```
+这个例子展示了toString（）在由进制传入时输出的变化。10 可以输出为任意进制格式的数字。注意默认（未提供参数）和出入进制数10是相同的结果。<br>
+如果你无法确认传入值是不是 null 或 undefined，你也用 String（）转化方法，会不管值的类型返回一个字符串。String（）方法符合下列规则：
+* 如果值有toString（）方法，它即会被调用（无参数）并返回结果。
+* 如果值是 null，“null”被返回。 undefined 同null。
+```js
+let value1 = 10;
+let value2 = true;
+let value3 = null;
+let value4;
+console.log(String(value1));// "10"
+console.log(String(value2)); // "true"
+console.log(String(value3)); // "null"
+console.log(String(value4));// "undefined"
+```
+此处，四个值被转化为字符串，数字，布尔，null 和 undefined。数字的结果和布尔的结果和toString（）被调用是相同的。因为 toString（）对于 null 和 undefined 是不可用的，String（）方法会简单的返回这些值的字面值。
+> **注意** 你可以通过在一个值前面（+）加上空字符串“”来把一个值转化为字符串值（晚些会在**操作符**一章讨论）
+
+#### 模版字符串
+在 ECMAScript6 中引入新的可能，用模版字符串定义字符串。不像单引号和双引号对照，模版字符串识别换行字符，可以被定义扩展多行：
+```js
+let myMultiLineString = 'first line\nsecond line';
+let myMultiLineTemplateLiteral = `first line second line`;
+console.log(myMultiLineString);
+// first line
+// second line"
+console.log(myMultiLineTemplateLiteral); 
+// first line
+// second line
+console.log(myMultiLineString === myMultiLinetemplateLiteral); // true
+```
+如名称建议，模版字符串在定义模版时特别有用，如 HTML：
+```js
+let pageHTML = `
+<div>
+  <a href="#"> 
+   <span>Jake</span>
+  </a>
+</div>`;
+```
+因为模版字符串会确实匹配重音符里的空格，当定义他们时特殊的处理会发生。一个正确格式的模版字符串可能会出现不合适的缩进：***(20-10-10)***
+```js
+// This template literal has 25 spaces following the line return character
+let myTemplateLiteral = `first line
+second line`;
+console.log(myTemplateLiteral.length); // 47
+
+// This template literal begins with a line return character
+let secondTemplateLiteral = `
+first line
+second line`;
+console.log(secondTemplateLiteral[0] === '\n'); // true
+
+
+// This template literal has no unexpected whitespace characters
+let thirdTemplateLiteral = `first line
+second line`;
+console.log(thirdTemplateLiteral[0]);
+// first line 
+// second line
+```
