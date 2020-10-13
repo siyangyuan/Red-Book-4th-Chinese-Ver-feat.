@@ -848,3 +848,44 @@ console.log(thirdTemplateLiteral[0]);
 // first line 
 // second line
 ```
+##### 插入文字
+模版字符串最有用的特性之一就是对插补文字的支持，允许你在单句不断开的定义中插入值一个或多个值。技术上，模版字符串不是字符串，他们是特殊的 js 语法表达来评估为一个字符串。模版字符串当被定义是就快速的被评估且被转化为字符串实例，且任何插入值会被从当前作用域被引入。<br>
+这可以通过使用 ${} 中的 js 表达来完成：
+```js
+let value = 5;
+let exponent = 'second';
+// Formerly, interpolation was accomplished as follows:
+let interpolatedString =
+value + ' to the ' + exponent + ' power is ' + (value * value);
+// The same thing accomplished with template literals: let interpolatedTemplateLiteral =
+`${ value } to the ${ exponent } power is ${ value * value }`;
+console.log(interpolatedString); // 5 to the second power is 25
+console.log(interpolatedTemplateLiteral); // 5 to the second power is 25
+```
+值最后会强制被用 toString（）转化为字符串，但任何 js 表达式都能安全的进行插入。安全的链接模版字符串不需要额外的空格：
+```js
+console.log(`Hello, ${ `World` }!`); // Hello, World!
+```
+toString() 被引入来使得表达式转化为string：
+```js
+let foo = { toString: () => 'World' };
+console.log(`Hello, ${ foo }!`); // Hello, World!
+```
+在插入表达式中使用函数和方法是允许的：
+```js
+function capitalize(word) {
+return `${ word[0].toUpperCase() }${ word.slice(1) }`;
+}
+console.log(`${ capitalize('hello') }, ${ capitalize('world') }!`); // Hello, World!
+```
+额外的，模版可以安全的插入变量的之前的值：
+```js
+let value = ''; function append() {
+value = `${value}abc`
+console.log(value); }
+append(); // abc 
+append(); // abcabc 
+append(); // abcabcabc
+```
+##### 模版字符串标签方法
+***(20-10-12)***
