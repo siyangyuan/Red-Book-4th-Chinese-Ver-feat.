@@ -889,3 +889,104 @@ append(); // abcabcabc
 ```
 ##### 模版字符串标签方法
 ***(20-10-12)***
+模版字符串也支持定义标签方法，可以用来定义特定的插入字段行为。标签方法被通过（？ is passed），在模版被插入字段分割的独立的片段后，在表达式被执行后。<br>
+一个标签方法被定义为一个常规方法被应用到模版字符串中通过被前置到它之前，如下面代码展示的。标签方法将被通过模版字符串被分割成片：第一个参数是一列字符串组成的数组，剩下的参数为表达式的执行结果。这个方法的返回值是模版字符串的执行结果。<br>
+这有个最佳的展示例子：
+```js
+let a = 6;
+let b = 9;
+function simpleTag(strings, aValExpression, bValExpression, sumExpression) { 
+  console.log(strings);
+  console.log(aValExpression);
+  console.log(bValExpression);
+  console.log(sumExpression);
+  return 'foobar';
+}
+let untaggedResult = `${ a } + ${ b } = ${ a + b }`;
+let taggedResult = simpleTag`${ a } + ${ b } = ${ a + b }`
+// [ '', ' + ', ' = ', '' ]
+// 6
+// 9
+// 15
+console.log(untaggedResult); // "6 + 9 = 15" console.log(taggedResult); // "foobar"
+```
+因为这里的变量数是可变的，聪明的做法是使用扩展符吧他们组合成单个集合：
+```js
+let a = 6;
+let b = 9;
+
+function simpleTag(strings, ...expressions) {
+  console.log(strings);
+  for(const expression of expressions) {
+      console.log(expression); 
+  }
+  return 'foobar'; 
+}
+let taggedResult = simpleTag`${ a } + ${ b } = ${ a + b }`
+// [ '', ' + ', ' = ', '' ]
+// 6
+// 9
+// 15
+console.log(taggedResult); // "foobar"
+```
+对于一个有 n 个插入字段的模版字符串，标签方法表达式的参数也会是 n，第一个参数中切割成的字符串片也会总为 n+1。因此，如果你希望“压缩（zip）”字符串并和表达式一起执行返回默认字符串，你可以这样做：
+```js
+let a = 6; 
+let b = 9;
+function zipTag(strings, ...expressions) { 
+return strings[0] +
+    expressions.map((e, i) => `${e}${strings[i + 1]}`) .join('');
+}
+let untaggedResult = `${ a } + ${ b } = ${ a + b }`;
+let taggedResult = zipTag`${ a } + ${ b } = ${ a + b }`;
+console.log(untaggedResult); // "6 + 9 = 15" 
+console.log(taggedResult); // "6 + 9 = 15"
+```
+#### 原始字符串
+使用模版字符串时可以直接使用原始的字符串而不是转换成实际转化字符，比如换行和 unicode 字符一类。可以通过使用 String.raw 方法来达成，默认下是生效的：
+```js
+// Unicode demo
+// \u00A9 is the copyright symbol
+console.log(`\u00A9`); // © 
+console.log(String.raw`\u00A9`); // \u00A9
+
+
+// Newline demo
+console.log(`first line\nsecond line`);
+// first line
+// second line
+console.log(String.raw`first line\nsecond line`); // "first line\nsecond line"
+
+// This does not work for actual newline characters: they do not // undergo conversion from their plaintext escaped equivalents
+console.log(`first line
+second line`);
+// first line 
+// second line
+
+console.log(String.raw`first line second line`);
+// first line
+// second line
+```
+在标签方法中，原始值也做为一个可用属性存在于字符串集合中的没个元素上
+```js
+
+function printRaw(strings) {
+  console.log('Actual characters:');
+  for (const string of strings) {
+  	console.log(string); 
+  }
+  console.log('Escaped characters;'); 
+  for (const rawString of strings.raw) {
+  	console.log(rawString);
+  }
+}
+printRaw`\u00A9${ 'and' }\n`;
+// Actual characters:
+// ©
+// (newline)
+// Escaped characters: // \u00A9
+// \n
+```
+### Symbol类型
+ECMAScript 6 中定义了新类型 Symbol 数据类型。Symbol 是原始变量，它的实例是唯一且不可改变的。使用 Symbol 的目的是为对象属性产生唯一的标志符避免碰撞的风险。<br>
+尽管他们看起来和私有属性有很多相同点，symbol 不是为了提供私有属性行为（特别的因为 Object API 提供了简单发现 symbol 的方法）。相代替的，symbol 用来创造唯一词以作为特殊值的 key 区别于其它使用 string 为 key 的属性。***(20-10-13)***
