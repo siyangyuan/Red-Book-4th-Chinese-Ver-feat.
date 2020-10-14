@@ -990,3 +990,46 @@ printRaw`\u00A9${ 'and' }\n`;
 ### Symbol类型
 ECMAScript 6 中定义了新类型 Symbol 数据类型。Symbol 是原始变量，它的实例是唯一且不可改变的。使用 Symbol 的目的是为对象属性产生唯一的标志符避免碰撞的风险。<br>
 尽管他们看起来和私有属性有很多相同点，symbol 不是为了提供私有属性行为（特别的因为 Object API 提供了简单发现 symbol 的方法）。相代替的，symbol 用来创造唯一词以作为特殊值的 key 区别于其它使用 string 为 key 的属性。***(20-10-13)***
+#### 基础的 Symbol 使用
+Symbol 使用 Symbol方法进行实例化。因为它是它本身的基础类型，typeof 操作符将会把一个symbol 识别为 symbol。
+```js
+let sym = Symbol(); 
+console.log(typeof sym); // symbol
+```
+当运行方法时，你可以提供一个配置字符串用来标示 symbol 实例当进行调试时。该字符串时和 symbol 的定义及识别完全分开的：
+```js
+let genericSymbol = Symbol();
+let otherGenericSymbol = Symbol();
+let fooSymbol = Symbol('foo');
+let otherFooSymbol = Symbol('foo');
+console.log(genericSymbol == otherGenericSymbol); // false 
+console.log(fooSymbol == otherFooSymbol); // false
+```
+Symbole 没有字面形式的语法，这对于它的目的来说也是至关重要的。标准说明定义了 symbol 操作允许你如何创建一个 Symbol 实例并用它来作为对象新属性的 key 以保证你不会覆盖一份已经存在的对象属性——无关于是否使用 string 或者 symbol 作为 key。
+```js
+let genericSymbol = Symbol();
+console.log(genericSymbol); // Symbol()
+let fooSymbol = Symbol('foo'); 
+console.log(fooSymbol); // Symbol(foo);
+```
+请注意，Symbol 方法我无法使用 new 关键字。这样做的目的是避免 symbol 对象包装，像 Boolean，String，Numer是可以的，它们支持构造行为并且实例话一个基本的包装对象：
+```js
+let myBoolean = new Boolean(); 
+console.log(typeof myBoolean); // "object"
+let myString = new String();
+console.log(typeof myString); // "object"
+let myNumber = new Number(); 
+console.log(typeof myNumber); // "object"
+let mySymbol = new Symbol(); // TypeError: Symbol is not a constructor
+```
+如果你想运用对象包装，你可以使用 Object() 方法：
+```js
+let mySymbol = Symbol();
+let myWrappedSymbol = Object(mySymbol); console.log(typeof myWrappedSymbol); // "object"
+```
+#### 使用全局 Symbol 注册
+设想中当不同运行时需要共享和重用一个 symbol 实例，我们可以用string-keyed 全局 symbol 注册的方式创建和复用 symbols。<br>
+可以通过使用 Symbol.for（）方法达到：***(20-10-14)***
+```js
+let fooGlobalSymbol = Symbol.for('foo');
+console.log(typeof fooGlobalSymbol); // "object"
