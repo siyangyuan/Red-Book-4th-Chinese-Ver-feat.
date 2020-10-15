@@ -1033,3 +1033,77 @@ let myWrappedSymbol = Object(mySymbol); console.log(typeof myWrappedSymbol); // 
 ```js
 let fooGlobalSymbol = Symbol.for('foo');
 console.log(typeof fooGlobalSymbol); // "object"
+```
+Symbol.for（）对于每个字符串 key 来说是幂等操作符。他第一次被调用时会给被传入一个字符串，他会检查全局的运行时注册记录，发现没有 symbol 存在的话，就生成一个新的 symbol 实例，并添加到注册记录。而外的，调用相同的字符串库会检查全局运行时注册记录，到对应这个字符串的 symbol ， 存在的话就返回这个实例。
+```js
+let fooGlobalSymbol = Symbol.for('foo'); // creates new symbol
+let otherFooGlobalSymbol = Symbol.for('foo'); // reuses existing symbol
+console.log(fooGlobalSymbol === otherFooGlobalSymbol); // true
+```
+在全局注册器定义的 symbol 和使用 Symbol() 创建的的对象是完全不停的，尽管他们的描述相近：
+```js
+let localSymbol = Symbol('foo');
+let globalSymbol = Symbol.for('foo');
+console.log(localSymbol === globalSymbol); // false
+```
+全局注册器需要传入字符串 key，所以你提供给 Symbol.for() 的任何参数将会被转化为一个string。而外的，用在注册器中的字符串也被作为 symbol 的描述。
+```js
+let emptyGlobalSymbol = Symbol.for(); 
+console.log(emptyGlobalSymbol); // Symbol(undefined)
+```
+可以用 Symbol.keyFor（） 检查全局注册器，传入一个 symbol 并返回这个全局symbol的标志字符串，或返回 undefined 如果这个是 symbol 不是全局symbole 的话。
+```js
+// Create global symbol
+let s = Symbol.for('foo'); console.log(Symbol.keyFor(s));
+// foo
+// Create regular symbol
+let s2 = Symbol('bar'); console.log(Symbol.keyFor(s2)); // undefined
+```
+在非 symbol 的对象上使用 Symbol.keyFor() 会抛出一个类型错误：
+```js
+Symbol.keyFor(123); // TypeError: 123 is not a symbol
+```
+#### 使用 Symbols 作属性
+任何地方你都可以使用 string 或者 number 作为属性，你也可以用 symbole。这包括了对象的字面属性Object.defineProperty()/Object.defineProperties().<br>
+一个对象文本可以只使用一个 symbole 做为属性包含在计算的属性语法中。
+```js
+let s1 = Symbol('foo'), 
+s2 = Symbol('bar'), 
+s3 = Symbol('baz'), 
+s4 = Symbol('qux');
+let o = {
+	[s1]: 'foo val'
+};
+// Also valid: o[s1] = 'foo val';
+console.log(o);
+// {Symbol{foo}: foo val}
+Object.defineProperty(o, s2, {value: 'bar val'});
+console.log(o);
+// {Symbol{foo}: foo val, Symbol(bar): bar val}
+Object.defineProperties(o, { 
+  [s3]: {value: 'baz val'},
+  [s4]: {value: 'qux val'}
+});
+
+console.log(o);
+// {Symbol{foo}: foo val, Symbol(bar): bar val,
+// Symbol{baz}: baz val, Symbol(qux): qux val}
+```
+**[s1] 这个写法请注意**<br>
+如同 Object.getOwnPropertyNames() 返回对象实例的常规属性数组，Object.getOwnPropertySymbols() 返回对象实例中的 symbole 对象数组。这两种方法的返回值是完全独立的。Object .getOwnPropertyDescriptors()方法会返回对象包含的常规及 symbol 属性描述。Reflect.ownKeys() 会返回两种的 key。***(20-10-15***
+```js
+let s1 = Symbol('foo'),
+s2 = Symbol('bar');
+let o = {
+  [s1]: 'foo val',
+  [s2]: 'bar val', 
+  baz: 'baz val',
+  qux: 'qux val'
+};
+console.log(Object.getOwnPropertySymbols(o)); // [Symbol(foo), Symbol(bar)]
+console.log(Object.getOwnPropertyNames(o)); // ["baz", "qux"]
+console.log(Object.getOwnPropertyDescriptors(o));
+// {baz: {...}, qux: {...}, Symbol(foo): {...}, Symbol(bar): {...}}
+console.log(Reflect.ownKeys(o));
+// ["baz", "qux", Symbol(foo), Symbol(bar)]
+```
