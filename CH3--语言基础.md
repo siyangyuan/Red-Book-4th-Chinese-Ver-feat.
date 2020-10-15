@@ -1090,7 +1090,7 @@ console.log(o);
 // Symbol{baz}: baz val, Symbol(qux): qux val}
 ```
 **[s1] 这个写法请注意**<br>
-如同 Object.getOwnPropertyNames() 返回对象实例的常规属性数组，Object.getOwnPropertySymbols() 返回对象实例中的 symbole 对象数组。这两种方法的返回值是完全独立的。Object .getOwnPropertyDescriptors()方法会返回对象包含的常规及 symbol 属性描述。Reflect.ownKeys() 会返回两种的 key。***(20-10-15***
+如同 Object.getOwnPropertyNames() 返回对象实例的常规属性数组，Object.getOwnPropertySymbols() 返回对象实例中的 symbole 对象数组。这两种方法的返回值是完全独立的。Object .getOwnPropertyDescriptors()方法会返回对象包含的常规及 symbol 属性描述。Reflect.ownKeys() 会返回两种的 key。***(20-10-15)***
 ```js
 let s1 = Symbol('foo'),
 s2 = Symbol('bar');
