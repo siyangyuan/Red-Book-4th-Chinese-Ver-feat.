@@ -1107,3 +1107,20 @@ console.log(Object.getOwnPropertyDescriptors(o));
 console.log(Reflect.ownKeys(o));
 // ["baz", "qux", Symbol(foo), Symbol(bar)]
 ```
+因为一个属性算作这个 symbol 在内存中的一个引用，symbol 是不会丢失的如果直接创建并用作属性的话。然而，拒绝保存一个属性的特定的引用意味着需要横向移动过所有对象的 symbol 属性来恢复属性键值：（说白了就是要遍历市区了hash 的优势）
+```js
+let o = {
+  [Symbol('foo')]: 'foo val',
+  [Symbol('bar')]: 'bar val'
+};
+console.log(o);
+// {Symbol(foo): "foo val", Symbol(bar): "bar val"}
+let barSymbol = Object.getOwnPropertySymbols(o)
+.find((symbol) => symbol.toString().match(/bar/));
+console.log(barSymbol); // Symbol(bar) 
+```
+#### 著名的 symbol
+从添加 symbol 以来， ECMAScript6 也引出了著名的 symbols 合集来揭示直接链接，覆盖，仿真的内部语言行为。这些著名的 symbols 在symbol构造方法中存在为字符串属性。<br>
+一个这些著名的 symbols 的应用是重定义他们来改变原始语言构造器的行为。例如，因为，因为知道 for-of 循环将会如何使用 Symbol.iterator 属性，在任何提供它的对象上，是可以提供一个自定义的 Symbol.iterator 值在一个自定义对象中去控制 for-of 如何表现，当提供该对象时。<br>
+关于这些著名的symbol 没有什么特别的，他们是常规的字符串属性存在于 Symbol 全局标志了一个 symbol 实例。每个 著名的symbol 属性是不可写的，不可枚举的，不可配置的。
+> **注意** 当讨论 ECMAScript 标准时，你将常常见到这些 symbol 被通过他们特定的名称引用，即前置@@的形式。例如。@@iterator 表示  Symbol.iterator
