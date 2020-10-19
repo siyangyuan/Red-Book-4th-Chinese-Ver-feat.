@@ -1124,3 +1124,46 @@ console.log(barSymbol); // Symbol(bar)
 一个这些著名的 symbols 的应用是重定义他们来改变原始语言构造器的行为。例如，因为，因为知道 for-of 循环将会如何使用 Symbol.iterator 属性，在任何提供它的对象上，是可以提供一个自定义的 Symbol.iterator 值在一个自定义对象中去控制 for-of 如何表现，当提供该对象时。<br>
 关于这些著名的symbol 没有什么特别的，他们是常规的字符串属性存在于 Symbol 全局标志了一个 symbol 实例。每个 著名的symbol 属性是不可写的，不可枚举的，不可配置的。
 > **注意** 当讨论 ECMAScript 标准时，你将常常见到这些 symbol 被通过他们特定的名称引用，即前置@@的形式。例如。@@iterator 表示  Symbol.iterator
+
+##### Symbol.asyncIterator
+依据 ECMAScript 规范，这个 symbol 被用作一个属性代表“一个返回对象默认 异步迭代器的方法。由 for-await-of 语法进行调用”。它用来识别实现可异步迭代器API的方法。<br>
+如同 for-await-of 循环的语言结构使用该方法来表现出异步和迭代的特性。他们会引用被 Symbol.asyncInterator 标记的方法并期望它返回一个实现了迭代器API的对象。在很多例子中，这会采用一个 asyncGenerator 的形式，一个对象实现了这个 API：
+```js
+class Foo {
+	async *[Symbol.asyncIterator](){}
+}
+let f = new Foo();
+console.log(f[Symbol.asynvIterator]())
+```
+特别的，由 Symbol.asyncIterator 方法产生的对象应该通过它的 next() 方法有序的执行 Promise 实例。这可以通过特定的 next() 方法定义或隐式的通过一个异步生成器方法：
+```js
+// 哦豁 看不懂了
+class Emitter {
+    constructor(max){
+        this.max = max;
+        this.asyncIdx = 0;
+    }
+    async *[Symbol.asyncIterator](){
+        while(this.asyncIdx < this.max){
+            yield new Promise((resolve) => resolve(this.asyncIdx++))
+        }
+    }
+}
+
+async function asyncCount() {
+    let emitter = new Emitter(5)
+    console.log(emitter);
+    
+    for await(const x of emitter){
+        console.log(x);
+    }
+}
+
+asyncCount()
+// 0
+// 1
+// 2
+// 3
+// 4
+```
+> **注意** Symbol.asynvIterator 是 ES2018 的规范，所以只有新的浏览器版本会支持它。更多的细节关于 synchronous iteration 和 the for-await-of loop 的细节可以在附录A中找到。
