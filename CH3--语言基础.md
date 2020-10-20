@@ -1166,4 +1166,35 @@ asyncCount()
 // 3
 // 4
 ```
-> **注意** Symbol.asynvIterator 是 ES2018 的规范，所以只有新的浏览器版本会支持它。更多的细节关于 synchronous iteration 和 the for-await-of loop 的细节可以在附录A中找到。
+> **注意** Symbol.asynvIterator 是 ES2018 的规范，所以只有新的浏览器版本会支持它。更多的细节关于 synchronous iteration 和 the for-await-of loop 的细节可以在附录A中找到。***(20-10-19)***
+
+##### Symbol.hasInstance
+依据 ECMAScript 规范，这个 symbol 被用来作为“一个决定某构造对象是否识别对象为构造器实例之一的方法。被以 instanceof 操作符的语义方法调用”的一个属性。instanceof 操作符提供了辨认一个对象的原型是否在原型链上的方法。一般像下面这样使用 instanceof ：
+```js
+function Foo() {}
+let f = new Foo();
+console.log(f instanceof Foo); // true
+class Bar {}
+let b = new Bar();
+console.log(b instanceof Bar); // true
+```
+在 ES6 中，instanceof 操作符是使用一个 Symbol.hasInstance 方法来评估这个关系。Symbol.hasInstance 标志了一个表现相同但操作对象顺序反置的方法：
+```js
+function Foo() {}
+let f = new Foo();
+console.log(Foo[Symbol.hasInstance](f)); // true
+class Bar {}
+let b = new Bar(); 
+console.log(Bar[Symbol.hasInstance](b)); // true
+```
+这个属性被定义在 Function 的原型上,且因此它是对于默认所有函数和类都可用的。因为 instanceof 操作符和其他属性一样会寻找原型链上的属性定义，它是可以在继承的类上重定义函数为一个静态方法的：***(20-10-20)***
+```js
+class Bar {}
+class Baz extends Bar {
+static [Symbol.hasInstance]() { return false;
+}
+}
+let b = new Baz(); console.log(Bar[Symbol.hasInstance](b)); console.log(b instanceof Bar); console.log(Baz[Symbol.hasInstance](b)); console.log(b instanceof Baz);
+// true // true // false // false
+```
+
